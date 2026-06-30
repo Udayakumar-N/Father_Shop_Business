@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>🛒 Shop Manager | கடை மேலாளர்</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg:          #FFF8F0;
+  --bg2:         #FFFFFF;
+  --surface:     #FFFFFF;
+  --border:      #FFE4C4;
+  --text:        #2D1B00;
+  --text2:       #7A5C3A;
+  --shadow:      rgba(255,140,0,0.12);
+
+  --orange:      #FF7A00;
+  --orange-lt:   #FFF0E0;
+  --teal:        #00B4A6;
+  --teal-lt:     #E0FAF8;
+  --yellow:      #FFD600;
+  --yellow-lt:   #FFFBE0;
+  --red:         #FF3B30;
+  --red-lt:      #FFE8E6;
+  --green:       #34C759;
+  --green-lt:    #E6F9EC;
+  --purple:      #AF52DE;
+  --purple-lt:   #F5E8FF;
+  --blue:        #007AFF;
+  --blue-lt:     #E5F0FF;
+
+  --nav-h:       72px;
+  --header-h:    64px;
+  --radius:      18px;
+  --radius-sm:   10px;
+  --font:        'Baloo 2', 'Noto Sans Tamil', sans-serif;
+  --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg:          #1A1008;
+  --bg2:         #251806;
+  --surface:     #2E1F0A;
+  --border:      #4A3010;
+  --text:        #FFE8CC;
+  --text2:       #C49A60;
+  --shadow:      rgba(0,0,0,0.4);
+  --orange-lt:   #3A2000;
+  --teal-lt:     #003330;
+  --yellow-lt:   #302800;
+  --red-lt:      #3A0A08;
+  --green-lt:    #0A2E14;
+  --purple-lt:   #1E0A30;
+  --blue-lt:     #001A3A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Header */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+#header h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--orange);
+  letter-spacing: -0.3px;
+}
+
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+.icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--orange-lt);
+  color: var(--orange);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.icon-btn:active { transform: scale(0.9); }
+
+#lang-btn {
+  background: var(--teal-lt);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 700;
+  width: auto;
+  padding: 0 12px;
+  border-radius: 20px;
+  height: 36px;
+  font-family: var(--font);
+}
+
+/* Pages */
+#pages {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.page {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 16px 16px calc(var(--nav-h) + 16px);
+  animation: fadeSlide 0.25s ease;
+}
+
+.page.active { display: block; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Bottom Nav */
+#bottom-nav {
+  display: flex;
+  height: var(--nav-h);
+  background: var(--surface);
+  border-top: 2px solid var(--border);
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 6px 0;
+  position: relative;
+}
+
+.nav-icon { font-size: 26px; line-height: 1; transition: var(--transition); }
+.nav-label { font-size: 10px; font-weight: 700; color: var(--text2); font-family: var(--font); transition: var(--transition); }
+
+.nav-item.active .nav-icon  { transform: translateY(-2px); }
+.nav-item.active .nav-label { color: var(--orange); }
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 3px;
+  background: var(--orange);
+  border-radius: 3px 3px 0 0;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 4px; right: calc(50% - 20px);
+  background: var(--red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+
+/* ============================================================
+   CARDS & COMMON
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 14px;
+  border: 1.5px solid var(--border);
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 18px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  height: 46px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  padding: 0 16px;
+  font-size: 15px;
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: var(--transition);
+}
+.search-input:focus { border-color: var(--orange); }
+
+.voice-btn {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.voice-btn:active { transform: scale(0.9); background: var(--orange-lt); }
+.voice-btn.listening { background: var(--red-lt); border-color: var(--red); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  right: 16px;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #FF4500);
+  color: #fff;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,122,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  z-index: 90;
+}
+.fab:active { transform: scale(0.9) rotate(45deg); }
+
+/* Action buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  height: 44px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-danger  { background: var(--red-lt); color: var(--red); }
+.btn-success { background: var(--green-lt); color: var(--green); }
+.btn-teal    { background: var(--teal-lt); color: var(--teal); }
+.btn-full    { width: 100%; justify-content: center; }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+#dash-greeting {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.stat-card {
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1.5px solid transparent;
+}
+.stat-card:active { transform: scale(0.97); }
+
+.stat-icon { font-size: 32px; line-height: 1; }
+.stat-num  { font-size: 30px; font-weight: 800; line-height: 1; }
+.stat-lbl  { font-size: 12px; font-weight: 600; opacity: 0.8; }
+
+.stat-orange { background: var(--orange-lt); color: var(--orange); }
+.stat-red    { background: var(--red-lt);    color: var(--red); }
+.stat-teal   { background: var(--teal-lt);   color: var(--teal); }
+.stat-yellow { background: var(--yellow-lt); color: #B8860B; }
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quick-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  color: var(--text);
+}
+.quick-btn:active { transform: scale(0.93); background: var(--orange-lt); }
+.quick-btn-icon { font-size: 28px; }
+.quick-btn-lbl  { font-size: 11px; font-weight: 700; text-align: center; color: var(--text2); }
+
+.reminder-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--yellow-lt);
+  border: 1.5px solid var(--yellow);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.reminder-mini:active { transform: scale(0.98); }
+.reminder-mini-icon { font-size: 22px; flex-shrink: 0; }
+.reminder-mini-text { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.reminder-mini-time { font-size: 11px; color: var(--text2); font-weight: 600; }
+
+/* ============================================================
+   STOCK
+   ============================================================ */
+.product-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1.5px solid var(--border);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+.product-card:active { transform: scale(0.98); }
+
+.product-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-green  { background: var(--green); }
+.dot-yellow { background: var(--yellow); box-shadow: 0 0 0 2px rgba(255,214,0,0.3); }
+.dot-red    { background: var(--red); box-shadow: 0 0 0 2px rgba(255,59,48,0.3); animation: blink 1.2s infinite; }
+
+@keyframes blink {
+  0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+
+.product-emoji { font-size: 28px; flex-shrink: 0; }
+.product-info  { flex: 1; min-width: 0; }
+.product-name  { font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-qty   { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+.product-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.mini-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.mini-btn:active { transform: scale(0.85); }
+.mini-edit   { background: var(--blue-lt);   color: var(--blue); }
+.mini-delete { background: var(--red-lt);    color: var(--red); }
+
+.stock-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 6px;
+}
+.badge-green  { background: var(--green-lt);  color: var(--green); }
+.badge-yellow { background: var(--yellow-lt); color: #8B7000; }
+.badge-red    { background: var(--red-lt);    color: var(--red); }
+
+/* ============================================================
+   DEBT
+   ============================================================ */
+.debt-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1.5px solid var(--border);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.debt-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.debt-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--purple-lt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.debt-name    { font-size: 17px; font-weight: 800; color: var(--text); }
+.debt-phone   { font-size: 13px; color: var(--text2); font-weight: 600; }
+.debt-amount  { margin-left: auto; font-size: 20px; font-weight: 800; color: var(--red); }
+
+.debt-items {
+  font-size: 13px;
+  color: var(--text2);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+}
+
+.debt-footer { display: flex; gap: 8px; }
+
+.call-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 12px;
+  border: 2px solid var(--green);
+  background: var(--green-lt);
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: var(--transition);
+}
+.call-btn:active { transform: scale(0.96); }
+
+/* ============================================================
+   REMINDERS
+   ============================================================ */
+.reminder-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: var(--transition);
+}
+
+.reminder-card.completed { opacity: 0.55; }
+.reminder-card.completed .reminder-title { text-decoration: line-through; }
+
+.reminder-check {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: var(--transition);
+  margin-top: 2px;
+}
+.reminder-check.done { background: var(--green); border-color: var(--green); }
+
+.reminder-info    { flex: 1; }
+.reminder-title   { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.reminder-datetime {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reminder-past   { color: var(--red) !important; }
+.reminder-today  { color: var(--orange) !important; }
+.reminder-future { color: var(--teal) !important; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 20px 20px 32px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+/* Form */
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  height: 50px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  padding: 0 16px;
+  font-size: 16px;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: var(--transition);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--orange);
+  background: var(--surface);
+}
+.form-textarea {
+  height: auto;
+  min-height: 80px;
+  padding: 12px 16px;
+  resize: none;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.emoji-option {
+  height: 42px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.emoji-option:active, .emoji-option.selected {
+  border-color: var(--orange);
+  background: var(--orange-lt);
+}
+
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.modal-actions .btn { height: 50px; font-size: 16px; }
+
+/* ============================================================
+   TOAST / NOTIFICATION
+   ============================================================ */
+#toast-container {
+  position: fixed;
+  top: calc(var(--header-h) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  animation: toastIn 0.3s ease;
+  pointer-events: all;
+}
+.toast-icon { font-size: 22px; flex-shrink: 0; }
+.toast-exit { animation: toastOut 0.3s ease forwards; }
+
+@keyframes toastIn  { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+
+/* Reminder Popup */
+#reminder-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#reminder-popup.show { display: flex; }
+#reminder-popup-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  animation: popIn 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+
+#reminder-popup-icon  { font-size: 56px; margin-bottom: 12px; }
+#reminder-popup-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+#reminder-popup-msg   { font-size: 15px; color: var(--text2); margin-bottom: 20px; }
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text2);
+}
+.empty-icon { font-size: 56px; margin-bottom: 12px; }
+.empty-text { font-size: 16px; font-weight: 600; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body data-theme="light">
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <h1 id="app-title">🛒 Shop Manager</h1>
+    <div class="header-actions">
+      <button id="lang-btn"  class="icon-btn" onclick="toggleLang()" title="Language">🌐 EN</button>
+      <button id="dark-btn"  class="icon-btn" onclick="toggleDark()" title="Dark Mode">🌙</button>
+      <button id="voice-speak-btn" class="icon-btn" onclick="speakDashboard()" title="Read aloud">🔊</button>
+    </div>
+  </header>
+
+  <!-- PAGES -->
+  <main id="pages">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="page-dashboard" class="page active">
+      <div id="dash-greeting">👋 Good Morning!</div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-orange" onclick="switchPage('stock')">
+          <div class="stat-icon">📦</div>
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-lbl" id="lbl-total-items">Total Items</div>
+        </div>
+        <div class="stat-card stat-red" onclick="switchPage('stock')">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-num" id="stat-out">0</div>
+          <div class="stat-lbl" id="lbl-out-stock">Out of Stock</div>
+        </div>
+        <div class="stat-card stat-teal" onclick="switchPage('debt')">
+          <div class="stat-icon">💰</div>
+          <div class="stat-num" id="stat-debt">0</div>
+          <div class="stat-lbl" id="lbl-pending-debts">Pending Debts</div>
+        </div>
+        <div class="stat-card stat-yellow" onclick="switchPage('reminders')">
+          <div class="stat-icon">🔔</div>
+          <div class="stat-num" id="stat-reminders">0</div>
+          <div class="stat-lbl" id="lbl-today-reminders">Today Reminders</div>
+        </div>
+      </div>
+
+      <div class="section-title" id="lbl-quick-add">⚡ Quick Add</div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="openStockModal()">
+          <div class="quick-btn-icon">📦</div>
+          <div class="quick-btn-lbl" id="qb-add-stock">Add Stock</div>
+        </button>
+        <button class="quick-btn" onclick="openDebtModal()">
+          <div class="quick-btn-icon">💳</div>
+          <div class="quick-btn-lbl" id="qb-add-debt">Add Debt</div>
+        </button>
+        <button class="quick-btn" onclick="openReminderModal()">
+          <div class="quick-btn-icon">⏰</div>
+          <div class="quick-btn-lbl" id="qb-add-reminder">Add Reminder</div>
+        </button>
+      </div>
+
+      <div class="section-title" id="lbl-todays-reminders">📅 Today's Reminders</div>
+      <div id="dash-reminders"></div>
+    </section>
+
+    <!-- ============ STOCK ============ -->
+    <section id="page-stock" class="page">
+      <div class="search-bar">
+        <input type="text" class="search-input" id="stock-search" placeholder="🔍 Search product..." oninput="renderStock()" />
+        <button class="voice-btn" id="stock-voice-btn" onclick="voiceSearch('stock-search','stock-voice-btn')" title="Voice Search">🎤</button>
+      </div>
+      <div id="stock-list"></div>
+    </section>
+
+    <!-- ============ DEBT ============ -->
+    <section id="page-debt" class="page">
+      <div class="search-bar">
+        <input type="text" class="search-input" id="debt-search" placeholder="🔍 Search customer..." oninput="renderDebt()" />
+        <button class="voice-btn" id="debt-voice-btn" onclick="voiceSearch('debt-search','debt-voice-btn')" title="Voice Search">🎤</button>
+      </div>
+      <div id="debt-list"></div>
+    </section>
+
+    <!-- ============ REMINDERS ============ -->
+    <section id="page-reminders" class="page">
+      <div id="reminder-list"></div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-item active" onclick="switchPage('dashboard')" id="nav-dashboard">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label" id="nav-lbl-dashboard">Home</div>
+    </button>
+    <button class="nav-item" onclick="switchPage('stock')" id="nav-stock">
+      <div class="nav-icon">📦</div>
+      <div class="nav-label" id="nav-lbl-stock">Stock</div>
+      <div class="nav-badge" id="stock-badge" style="display:none">!</div>
+    </button>
+    <button class="nav-item" onclick="switchPage('debt')" id="nav-debt">
+      <div class="nav-icon">💰</div>
+      <div class="nav-label" id="nav-lbl-debt">Debts</div>
+    </button>
+    <button class="nav-item" onclick="switchPage('reminders')" id="nav-reminders">
+      <div class="nav-icon">🔔</div>
+      <div class="nav-label" id="nav-lbl-reminders">Reminders</div>
+      <div class="nav-badge" id="reminder-badge" style="display:none">!</div>
+    </button>
+  </nav>
+</div>
+
+<!-- FAB (context-sensitive) -->
+<button class="fab" id="main-fab" onclick="fabAction()">＋</button>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- STOCK MODAL -->
+<div class="modal-overlay" id="modal-stock">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="stock-modal-title">📦 Add Product</div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-product-emoji">Choose Icon</label>
+      <div class="emoji-picker" id="emoji-picker"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-product-name">Product Name</label>
+      <input class="form-input" id="product-name" type="text" placeholder="e.g. Rice, Sugar..." />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" id="lbl-quantity">Quantity</label>
+        <input class="form-input" id="product-qty" type="number" min="0" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="lbl-low-qty">Low Stock At</label>
+        <input class="form-input" id="product-low" type="number" min="1" placeholder="5" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-price">Price (₹)</label>
+      <input class="form-input" id="product-price" type="number" min="0" placeholder="0.00" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="closeModal('modal-stock')" id="btn-cancel-stock">✕ Cancel</button>
+      <button class="btn btn-primary" onclick="saveStock()" id="btn-save-stock">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEBT MODAL -->
+<div class="modal-overlay" id="modal-debt">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="debt-modal-title">💳 Add Debt</div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-cust-name">Customer Name</label>
+      <input class="form-input" id="debt-name" type="text" placeholder="Name..." />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-cust-phone">Phone Number</label>
+      <input class="form-input" id="debt-phone" type="tel" placeholder="98765 43210" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-debt-amount">Debt Amount (₹)</label>
+      <input class="form-input" id="debt-amount" type="number" min="0" placeholder="0.00" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-borrowed-items">Borrowed Items</label>
+      <textarea class="form-textarea" id="debt-items" placeholder="e.g. 2kg Rice, 1L Oil..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="closeModal('modal-debt')" id="btn-cancel-debt">✕ Cancel</button>
+      <button class="btn btn-primary" onclick="saveDebt()" id="btn-save-debt">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- REMINDER MODAL -->
+<div class="modal-overlay" id="modal-reminder">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="reminder-modal-title">⏰ Add Reminder</div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-reminder-title">Reminder Title</label>
+      <input class="form-input" id="reminder-title" type="text" placeholder="e.g. Buy vegetables..." />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-reminder-date">Date</label>
+      <input class="form-input" id="reminder-date" type="date" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="lbl-reminder-time">Time</label>
+      <input class="form-input" id="reminder-time" type="time" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="closeModal('modal-reminder')" id="btn-cancel-reminder">✕ Cancel</button>
+      <button class="btn btn-primary" onclick="saveReminder()" id="btn-save-reminder">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- REMINDER POPUP -->
+<div id="reminder-popup">
+  <div id="reminder-popup-box">
+    <div id="reminder-popup-icon">⏰</div>
+    <div id="reminder-popup-title">Reminder!</div>
+    <div id="reminder-popup-msg">Time for your reminder.</div>
+    <button class="btn btn-primary btn-full" onclick="dismissReminder()" id="btn-dismiss-reminder">✓ OK</button>
+  </div>
+</div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+/* ============================================================
+   DATA & STATE
+   ============================================================ */
+let lang = localStorage.getItem('lang') || 'en';
+let dark = localStorage.getItem('dark') === 'true';
+let currentPage = 'dashboard';
+let editStockId   = null;
+let editDebtId    = null;
+let editReminderId = null;
+let selectedEmoji = '📦';
+let voiceRecognition = null;
+let reminderTimer   = null;
+let pendingPopupReminder = null;
+
+/* Data arrays stored in localStorage */
+function getData(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
+function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let stocks    = getData('sm_stocks');
+let debts     = getData('sm_debts');
+let reminders = getData('sm_reminders');
+
+/* ============================================================
+   TRANSLATIONS
+   ============================================================ */
+const T = {
+  en: {
+    appTitle:         '🛒 Shop Manager',
+    greeting:         '👋 Good Morning!',
+    totalItems:       'Total Items',
+    outStock:         'Out of Stock',
+    pendingDebts:     'Pending Debts',
+    todayReminders:   "Today's Reminders",
+    quickAdd:         '⚡ Quick Add',
+    addStock:         'Add Stock',
+    addDebt:          'Add Debt',
+    addReminder:      'Add Reminder',
+    navHome:          'Home',
+    navStock:         'Stock',
+    navDebt:          'Debts',
+    navReminders:     'Reminders',
+    productEmoji:     'Choose Icon',
+    productName:      'Product Name',
+    quantity:         'Quantity',
+    lowStockAt:       'Low Stock At',
+    price:            'Price (₹)',
+    custName:         'Customer Name',
+    custPhone:        'Phone Number',
+    debtAmount:       'Debt Amount (₹)',
+    borrowedItems:    'Borrowed Items',
+    reminderTitle:    'Reminder Title',
+    reminderDate:     'Date',
+    reminderTime:     'Time',
+    cancel:           '✕ Cancel',
+    save:             '✓ Save',
+    addProduct:       '📦 Add Product',
+    editProduct:      '✏️ Edit Product',
+    addDebtModal:     '💳 Add Debt',
+    editDebtModal:    '✏️ Edit Debt',
+    addReminderModal: '⏰ Add Reminder',
+    editReminderModal:'✏️ Edit Reminder',
+    available:        'Available',
+    lowStock:         'Low Stock',
+    outOfStock:       'Out of Stock',
+    noStock:          'No products yet!\nTap + to add one.',
+    noDebt:           'No debts recorded!\nTap + to add one.',
+    noReminder:       'No reminders yet!\nTap + to add one.',
+    noTodayReminder:  'No reminders today 🎉',
+    searchStock:      '🔍 Search product...',
+    searchDebt:       '🔍 Search customer...',
+    reminderPopup:    '⏰ Reminder!',
+    dismissOK:        '✓ Got it!',
+    saved:            '✅ Saved!',
+    deleted:          '🗑️ Deleted!',
+    completed:        '✅ Marked complete!',
+    call:             '📞 Call',
+    edit:             '✏️ Edit',
+    delete:           '🗑️',
+    todayReminderLbl: '📅 Today\'s Reminders',
+    tomorrowLabel:    'Tomorrow',
+    todayLabel:       'Today',
+    past:             'Past',
+    qb_add_stock:     'Add Stock',
+    qb_add_debt:      'Add Debt',
+    qb_add_reminder:  'Reminder',
+  },
+  ta: {
+    appTitle:         '🛒 கடை மேலாளர்',
+    greeting:         '👋 காலை வணக்கம்!',
+    totalItems:       'மொத்த பொருட்கள்',
+    outStock:         'கையிருப்பு இல்லை',
+    pendingDebts:     'நிலுவை கடன்கள்',
+    todayReminders:   'இன்றைய நினைவூட்டல்கள்',
+    quickAdd:         '⚡ விரைவு சேர்',
+    addStock:         'பொருள் சேர்',
+    addDebt:          'கடன் சேர்',
+    addReminder:      'நினைவூட்டல் சேர்',
+    navHome:          'முகப்பு',
+    navStock:         'கையிருப்பு',
+    navDebt:          'கடன்கள்',
+    navReminders:     'நினைவூட்டல்',
+    productEmoji:     'படம் தேர்வு',
+    productName:      'பொருளின் பெயர்',
+    quantity:         'அளவு',
+    lowStockAt:       'குறைவான கையிருப்பு',
+    price:            'விலை (₹)',
+    custName:         'வாடிக்கையாளர் பெயர்',
+    custPhone:        'தொலைபேசி எண்',
+    debtAmount:       'கடன் தொகை (₹)',
+    borrowedItems:    'எடுத்த பொருட்கள்',
+    reminderTitle:    'நினைவூட்டல் தலைப்பு',
+    reminderDate:     'தேதி',
+    reminderTime:     'நேரம்',
+    cancel:           '✕ ரத்து',
+    save:             '✓ சேமி',
+    addProduct:       '📦 பொருள் சேர்',
+    editProduct:      '✏️ பொருள் திருத்து',
+    addDebtModal:     '💳 கடன் சேர்',
+    editDebtModal:    '✏️ கடன் திருத்து',
+    addReminderModal: '⏰ நினைவூட்டல் சேர்',
+    editReminderModal:'✏️ நினைவூட்டல் திருத்து',
+    available:        'கையிருப்பு உள்ளது',
+    lowStock:         'குறைவாக உள்ளது',
+    outOfStock:       'கையிருப்பு இல்லை',
+    noStock:          'பொருட்கள் இல்லை!\n+ அழுத்தி சேர்க்கவும்.',
+    noDebt:           'கடன் பதிவுகள் இல்லை!\n+ அழுத்தி சேர்க்கவும்.',
+    noReminder:       'நினைவூட்டல்கள் இல்லை!\n+ அழுத்தி சேர்க்கவும்.',
+    noTodayReminder:  'இன்று நினைவூட்டல்கள் இல்லை 🎉',
+    searchStock:      '🔍 பொருள் தேடு...',
+    searchDebt:       '🔍 வாடிக்கையாளர் தேடு...',
+    reminderPopup:    '⏰ நினைவூட்டல்!',
+    dismissOK:        '✓ சரி!',
+    saved:            '✅ சேமிக்கப்பட்டது!',
+    deleted:          '🗑️ நீக்கப்பட்டது!',
+    completed:        '✅ முடிந்தது என குறிக்கப்பட்டது!',
+    call:             '📞 அழை',
+    edit:             '✏️',
+    delete:           '🗑️',
+    todayReminderLbl: '📅 இன்றைய நினைவூட்டல்கள்',
+    tomorrowLabel:    'நாளை',
+    todayLabel:       'இன்று',
+    past:             'கடந்தது',
+    qb_add_stock:     'கையிருப்பு',
+    qb_add_debt:      'கடன்',
+    qb_add_reminder:  'நினைவூட்டல்',
+  }
+};
+
+function t(key) { return T[lang][key] || T['en'][key] || key; }
+
+/* ============================================================
+   LANGUAGE TOGGLE
+   ============================================================ */
+function toggleLang() {
+  lang = lang === 'en' ? 'ta' : 'en';
+  localStorage.setItem('lang', lang);
+  applyLang();
+  renderAll();
+}
+
+function applyLang() {
+  document.getElementById('lang-btn').textContent = lang === 'en' ? '🌐 தமிழ்' : '🌐 EN';
+  document.getElementById('app-title').textContent     = t('appTitle');
+  document.getElementById('dash-greeting').textContent = t('greeting');
+  document.getElementById('lbl-total-items').textContent    = t('totalItems');
+  document.getElementById('lbl-out-stock').textContent      = t('outStock');
+  document.getElementById('lbl-pending-debts').textContent  = t('pendingDebts');
+  document.getElementById('lbl-today-reminders').textContent= t('todayReminders');
+  document.getElementById('lbl-quick-add').textContent      = t('quickAdd');
+  document.getElementById('qb-add-stock').textContent       = t('qb_add_stock');
+  document.getElementById('qb-add-debt').textContent        = t('qb_add_debt');
+  document.getElementById('qb-add-reminder').textContent    = t('qb_add_reminder');
+  document.getElementById('lbl-todays-reminders').textContent = t('todayReminderLbl');
+  document.getElementById('nav-lbl-dashboard').textContent  = t('navHome');
+  document.getElementById('nav-lbl-stock').textContent      = t('navStock');
+  document.getElementById('nav-lbl-debt').textContent       = t('navDebt');
+  document.getElementById('nav-lbl-reminders').textContent  = t('navReminders');
+  // Modal labels
+  document.getElementById('lbl-product-emoji').textContent  = t('productEmoji');
+  document.getElementById('lbl-product-name').textContent   = t('productName');
+  document.getElementById('lbl-quantity').textContent       = t('quantity');
+  document.getElementById('lbl-low-qty').textContent        = t('lowStockAt');
+  document.getElementById('lbl-price').textContent          = t('price');
+  document.getElementById('lbl-cust-name').textContent      = t('custName');
+  document.getElementById('lbl-cust-phone').textContent     = t('custPhone');
+  document.getElementById('lbl-debt-amount').textContent    = t('debtAmount');
+  document.getElementById('lbl-borrowed-items').textContent = t('borrowedItems');
+  document.getElementById('lbl-reminder-title').textContent = t('reminderTitle');
+  document.getElementById('lbl-reminder-date').textContent  = t('reminderDate');
+  document.getElementById('lbl-reminder-time').textContent  = t('reminderTime');
+  document.getElementById('btn-cancel-stock').textContent    = t('cancel');
+  document.getElementById('btn-save-stock').textContent      = t('save');
+  document.getElementById('btn-cancel-debt').textContent     = t('cancel');
+  document.getElementById('btn-save-debt').textContent       = t('save');
+  document.getElementById('btn-cancel-reminder').textContent = t('cancel');
+  document.getElementById('btn-save-reminder').textContent   = t('save');
+  document.getElementById('btn-dismiss-reminder').textContent= t('dismissOK');
+  document.getElementById('stock-search').placeholder        = t('searchStock');
+  document.getElementById('debt-search').placeholder         = t('searchDebt');
+  document.getElementById('reminder-popup-title').textContent= t('reminderPopup');
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+function toggleDark() {
+  dark = !dark;
+  localStorage.setItem('dark', dark);
+  applyDark();
+}
+function applyDark() {
+  document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('dark-btn').textContent = dark ? '☀️' : '🌙';
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  currentPage = name;
+  if (name === 'dashboard') renderDashboard();
+}
+
+function fabAction() {
+  if (currentPage === 'stock') openStockModal();
+  else if (currentPage === 'debt') openDebtModal();
+  else if (currentPage === 'reminders') openReminderModal();
+  else openStockModal();
+}
+
+/* ============================================================
+   EMOJI PICKER
+   ============================================================ */
+const EMOJIS = ['🛍️','📦','🍚','🧂','🫙','🥤','🧴','🍫','☕','🧻','🪣','🔦','🍊','🥛','🫒','🥩','🍞','🧃','🧹','💊','🌿','🧺','🪴','🔑','💡','🎁'];
+
+function buildEmojiPicker() {
+  const picker = document.getElementById('emoji-picker');
+  picker.innerHTML = '';
+  EMOJIS.forEach(em => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-option' + (em === selectedEmoji ? ' selected' : '');
+    btn.textContent = em;
+    btn.type = 'button';
+    btn.onclick = () => {
+      selectedEmoji = em;
+      document.querySelectorAll('.emoji-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    picker.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   STOCK MANAGEMENT
+   ============================================================ */
+function openStockModal(id = null) {
+  editStockId = id;
+  selectedEmoji = '📦';
+  buildEmojiPicker();
+  document.getElementById('product-name').value  = '';
+  document.getElementById('product-qty').value   = '';
+  document.getElementById('product-low').value   = '5';
+  document.getElementById('product-price').value = '';
+  document.getElementById('stock-modal-title').textContent = t('addProduct');
+
+  if (id !== null) {
+    const item = stocks.find(s => s.id === id);
+    if (item) {
+      selectedEmoji = item.emoji;
+      document.getElementById('product-name').value  = item.name;
+      document.getElementById('product-qty').value   = item.qty;
+      document.getElementById('product-low').value   = item.low;
+      document.getElementById('product-price').value = item.price || '';
+      document.getElementById('stock-modal-title').textContent = t('editProduct');
+      buildEmojiPicker();
+    }
+  }
+  openModal('modal-stock');
+}
+
+function saveStock() {
+  const name  = document.getElementById('product-name').value.trim();
+  const qty   = parseInt(document.getElementById('product-qty').value) || 0;
+  const low   = parseInt(document.getElementById('product-low').value) || 5;
+  const price = parseFloat(document.getElementById('product-price').value) || 0;
+  if (!name) { showToast('⚠️', lang==='ta'?'பெயர் தேவை!':'Product name required!'); return; }
+
+  if (editStockId !== null) {
+    const idx = stocks.findIndex(s => s.id === editStockId);
+    if (idx !== -1) stocks[idx] = { ...stocks[idx], emoji: selectedEmoji, name, qty, low, price };
+  } else {
+    stocks.push({ id: Date.now(), emoji: selectedEmoji, name, qty, low, price });
+  }
+  setData('sm_stocks', stocks);
+  closeModal('modal-stock');
+  renderAll();
+  showToast('✅', t('saved'));
+}
+
+function deleteStock(id) {
+  if (!confirm(lang==='ta'?'நீக்கவா?':'Delete this product?')) return;
+  stocks = stocks.filter(s => s.id !== id);
+  setData('sm_stocks', stocks);
+  renderAll();
+  showToast('🗑️', t('deleted'));
+}
+
+function getStockStatus(item) {
+  if (item.qty <= 0) return 'out';
+  if (item.qty <= item.low) return 'low';
+  return 'ok';
+}
+
+function renderStock() {
+  const q    = (document.getElementById('stock-search').value || '').toLowerCase();
+  const list = document.getElementById('stock-list');
+  const filtered = stocks.filter(s => s.name.toLowerCase().includes(q));
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">${t('noStock')}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(item => {
+    const st = getStockStatus(item);
+    const dotClass  = st === 'out' ? 'dot-red' : st === 'low' ? 'dot-yellow' : 'dot-green';
+    const badgeClass= st === 'out' ? 'badge-red' : st === 'low' ? 'badge-yellow' : 'badge-green';
+    const badgeTxt  = st === 'out' ? t('outOfStock') : st === 'low' ? t('lowStock') : t('available');
+    const priceStr  = item.price ? ` · ₹${item.price}` : '';
+
+    return `<div class="product-card">
+      <div class="product-dot ${dotClass}"></div>
+      <div class="product-emoji">${item.emoji}</div>
+      <div class="product-info">
+        <div class="product-name">${item.name}<span class="stock-badge ${badgeClass}">${badgeTxt}</span></div>
+        <div class="product-qty">Qty: ${item.qty}${priceStr}</div>
+      </div>
+      <div class="product-actions">
+        <button class="mini-btn mini-edit"   onclick="openStockModal(${item.id})">✏️</button>
+        <button class="mini-btn mini-delete" onclick="deleteStock(${item.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   DEBT TRACKER
+   ============================================================ */
+function openDebtModal(id = null) {
+  editDebtId = id;
+  document.getElementById('debt-name').value   = '';
+  document.getElementById('debt-phone').value  = '';
+  document.getElementById('debt-amount').value = '';
+  document.getElementById('debt-items').value  = '';
+  document.getElementById('debt-modal-title').textContent = t('addDebtModal');
+
+  if (id !== null) {
+    const item = debts.find(d => d.id === id);
+    if (item) {
+      document.getElementById('debt-name').value   = item.name;
+      document.getElementById('debt-phone').value  = item.phone;
+      document.getElementById('debt-amount').value = item.amount;
+      document.getElementById('debt-items').value  = item.items;
+      document.getElementById('debt-modal-title').textContent = t('editDebtModal');
+    }
+  }
+  openModal('modal-debt');
+}
+
+function saveDebt() {
+  const name   = document.getElementById('debt-name').value.trim();
+  const phone  = document.getElementById('debt-phone').value.trim();
+  const amount = parseFloat(document.getElementById('debt-amount').value) || 0;
+  const items  = document.getElementById('debt-items').value.trim();
+  if (!name) { showToast('⚠️', lang==='ta'?'பெயர் தேவை!':'Name required!'); return; }
+
+  if (editDebtId !== null) {
+    const idx = debts.findIndex(d => d.id === editDebtId);
+    if (idx !== -1) debts[idx] = { ...debts[idx], name, phone, amount, items };
+  } else {
+    debts.push({ id: Date.now(), name, phone, amount, items, date: new Date().toLocaleDateString() });
+  }
+  setData('sm_debts', debts);
+  closeModal('modal-debt');
+  renderAll();
+  showToast('✅', t('saved'));
+}
+
+function deleteDebt(id) {
+  if (!confirm(lang==='ta'?'நீக்கவா?':'Delete this debt?')) return;
+  debts = debts.filter(d => d.id !== id);
+  setData('sm_debts', debts);
+  renderAll();
+  showToast('🗑️', t('deleted'));
+}
+
+function renderDebt() {
+  const q    = (document.getElementById('debt-search').value || '').toLowerCase();
+  const list = document.getElementById('debt-list');
+  const filtered = debts.filter(d => d.name.toLowerCase().includes(q) || (d.phone || '').includes(q));
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">${t('noDebt')}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(d => {
+    const initials = d.name.charAt(0).toUpperCase();
+    return `<div class="debt-card">
+      <div class="debt-header">
+        <div class="debt-avatar">${initials}</div>
+        <div>
+          <div class="debt-name">${d.name}</div>
+          <div class="debt-phone">${d.phone || '—'}</div>
+        </div>
+        <div class="debt-amount">₹${(+d.amount).toFixed(0)}</div>
+      </div>
+      ${d.items ? `<div class="debt-items">🛍️ ${d.items}</div>` : ''}
+      <div class="debt-footer">
+        ${d.phone ? `<a class="call-btn" href="tel:${d.phone}">📞 ${t('call')}</a>` : '<div style="flex:1"></div>'}
+        <button class="mini-btn mini-edit"   onclick="openDebtModal(${d.id})" style="width:auto;padding:0 14px;border-radius:12px;">✏️</button>
+        <button class="mini-btn mini-delete" onclick="deleteDebt(${d.id})" style="width:auto;padding:0 14px;border-radius:12px;">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   REMINDER SYSTEM
+   ============================================================ */
+function openReminderModal(id = null) {
+  editReminderId = id;
+  document.getElementById('reminder-title').value = '';
+  // Set default date/time to now + 1 hour
+  const now = new Date();
+  now.setHours(now.getHours() + 1, 0, 0, 0);
+  document.getElementById('reminder-date').value = now.toISOString().split('T')[0];
+  document.getElementById('reminder-time').value = now.toTimeString().slice(0,5);
+  document.getElementById('reminder-modal-title').textContent = t('addReminderModal');
+
+  if (id !== null) {
+    const item = reminders.find(r => r.id === id);
+    if (item) {
+      document.getElementById('reminder-title').value = item.title;
+      document.getElementById('reminder-date').value  = item.date;
+      document.getElementById('reminder-time').value  = item.time;
+      document.getElementById('reminder-modal-title').textContent = t('editReminderModal');
+    }
+  }
+  openModal('modal-reminder');
+}
+
+function saveReminder() {
+  const title = document.getElementById('reminder-title').value.trim();
+  const date  = document.getElementById('reminder-date').value;
+  const time  = document.getElementById('reminder-time').value;
+  if (!title) { showToast('⚠️', lang==='ta'?'தலைப்பு தேவை!':'Title required!'); return; }
+  if (!date)  { showToast('⚠️', lang==='ta'?'தேதி தேவை!':'Date required!'); return; }
+
+  if (editReminderId !== null) {
+    const idx = reminders.findIndex(r => r.id === editReminderId);
+    if (idx !== -1) reminders[idx] = { ...reminders[idx], title, date, time };
+  } else {
+    reminders.push({ id: Date.now(), title, date, time, done: false });
+  }
+  setData('sm_reminders', reminders);
+  closeModal('modal-reminder');
+  renderAll();
+  showToast('✅', t('saved'));
+}
+
+function toggleReminder(id) {
+  const r = reminders.find(r => r.id === id);
+  if (r) { r.done = !r.done; setData('sm_reminders', reminders); renderAll(); }
+  if (r && r.done) showToast('✅', t('completed'));
+}
+
+function deleteReminder(id) {
+  if (!confirm(lang==='ta'?'நீக்கவா?':'Delete this reminder?')) return;
+  reminders = reminders.filter(r => r.id !== id);
+  setData('sm_reminders', reminders);
+  renderAll();
+  showToast('🗑️', t('deleted'));
+}
+
+function renderReminders() {
+  const list = document.getElementById('reminder-list');
+  if (reminders.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-text">${t('noReminder')}</div></div>`;
+    return;
+  }
+
+  const today  = todayStr();
+  const sorted = [...reminders].sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+
+  list.innerHTML = sorted.map(r => {
+    const isToday  = r.date === today;
+    const isPast   = r.date < today || (r.date === today && r.time && r.time < nowTimeStr());
+    const timeClass = r.done ? '' : (isPast ? 'reminder-past' : isToday ? 'reminder-today' : 'reminder-future');
+    const dateLabel = isToday ? t('todayLabel') : r.date;
+
+    return `<div class="reminder-card ${r.done ? 'completed' : ''}">
+      <div class="reminder-check ${r.done ? 'done' : ''}" onclick="toggleReminder(${r.id})">${r.done ? '✓' : ''}</div>
+      <div class="reminder-info">
+        <div class="reminder-title">${r.title}</div>
+        <div class="reminder-datetime ${timeClass}">📅 ${dateLabel} ${r.time ? '· ⏰ '+r.time : ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="mini-btn mini-edit"   onclick="openReminderModal(${r.id})">✏️</button>
+        <button class="mini-btn mini-delete" onclick="deleteReminder(${r.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function renderDashboard() {
+  const today = todayStr();
+  const outItems    = stocks.filter(s => s.qty <= 0).length;
+  const lowItems    = stocks.filter(s => s.qty > 0 && s.qty <= s.low).length;
+  const todayRemAct = reminders.filter(r => r.date === today && !r.done);
+
+  document.getElementById('stat-total').textContent     = stocks.length;
+  document.getElementById('stat-out').textContent       = outItems;
+  document.getElementById('stat-debt').textContent      = debts.length;
+  document.getElementById('stat-reminders').textContent = todayRemAct.length;
+
+  // Badges
+  const stockBadge = document.getElementById('stock-badge');
+  if (outItems + lowItems > 0) { stockBadge.style.display = 'flex'; stockBadge.textContent = outItems + lowItems; }
+  else stockBadge.style.display = 'none';
+
+  const remBadge = document.getElementById('reminder-badge');
+  if (todayRemAct.length > 0) { remBadge.style.display = 'flex'; remBadge.textContent = todayRemAct.length; }
+  else remBadge.style.display = 'none';
+
+  // Today reminders
+  const dashRem = document.getElementById('dash-reminders');
+  if (todayRemAct.length === 0) {
+    dashRem.innerHTML = `<div class="reminder-mini" style="background:var(--green-lt);border-color:var(--green)">
+      <div class="reminder-mini-icon">🎉</div>
+      <div class="reminder-mini-text">${t('noTodayReminder')}</div>
+    </div>`;
+  } else {
+    dashRem.innerHTML = todayRemAct.slice(0,3).map(r =>
+      `<div class="reminder-mini" onclick="switchPage('reminders')">
+        <div class="reminder-mini-icon">⏰</div>
+        <div class="reminder-mini-text">${r.title}</div>
+        <div class="reminder-mini-time">${r.time || ''}</div>
+      </div>`
+    ).join('');
+  }
+}
+
+function renderAll() {
+  renderDashboard();
+  renderStock();
+  renderDebt();
+  renderReminders();
+}
+
+/* ============================================================
+   MODAL HELPERS
+   ============================================================ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close modal when clicking overlay background
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeModal(this.id);
+  });
+});
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+function showToast(icon, msg, duration = 2500) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<div class="toast-icon">${icon}</div><div>${msg}</div>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+/* ============================================================
+   VOICE INPUT (Speech Recognition)
+   ============================================================ */
+function voiceSearch(inputId, btnId) {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    showToast('❌', lang==='ta'?'குரல் அங்கீகாரம் கிடைக்கவில்லை':'Speech recognition not available');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SpeechRecognition();
+  rec.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
+  rec.interimResults = false;
+
+  const btn = document.getElementById(btnId);
+  btn.classList.add('listening');
+
+  rec.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById(inputId).value = transcript;
+    document.getElementById(inputId).dispatchEvent(new Event('input'));
+    btn.classList.remove('listening');
+    showToast('🎤', (lang==='ta'?'கேட்டேன்: ':'Heard: ') + transcript);
+  };
+  rec.onerror  = () => { btn.classList.remove('listening'); showToast('❌', 'Voice error'); };
+  rec.onend    = () => btn.classList.remove('listening');
+  rec.start();
+}
+
+/* ============================================================
+   VOICE OUTPUT (Text-to-Speech)
+   ============================================================ */
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
+  utter.rate = 0.9;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakDashboard() {
+  const today = todayStr();
+  const outItems    = stocks.filter(s => s.qty <= 0).length;
+  const todayRemAct = reminders.filter(r => r.date === today && !r.done);
+  let msg;
+  if (lang === 'ta') {
+    msg = `உங்கள் கடையில் ${stocks.length} பொருட்கள் உள்ளன. ${outItems} பொருட்கள் கையிருப்பு இல்லை. ${debts.length} கடன்கள் உள்ளன. இன்று ${todayRemAct.length} நினைவூட்டல்கள் உள்ளன.`;
+  } else {
+    msg = `Your shop has ${stocks.length} products. ${outItems} items are out of stock. ${debts.length} pending debts. ${todayRemAct.length} reminders today.`;
+  }
+  speak(msg);
+  showToast('🔊', lang==='ta'?'படிக்கிறேன்...':'Reading aloud...');
+}
+
+/* ============================================================
+   REMINDER POPUP & AUTO CHECK
+   ============================================================ */
+function checkReminders() {
+  const now  = new Date();
+  const date = todayStr();
+  const time = nowTimeStr();
+
+  reminders.forEach(r => {
+    if (!r.done && r.date === date && r.time && r.time === time) {
+      triggerReminderPopup(r);
+    }
+  });
+}
+
+function triggerReminderPopup(r) {
+  document.getElementById('reminder-popup-msg').textContent = r.title;
+  document.getElementById('reminder-popup').classList.add('show');
+  pendingPopupReminder = r.id;
+  speak(r.title);
+  showToast('⏰', r.title, 5000);
+}
+
+function dismissReminder() {
+  document.getElementById('reminder-popup').classList.remove('show');
+  if (pendingPopupReminder !== null) {
+    toggleReminder(pendingPopupReminder);
+    pendingPopupReminder = null;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+         String(d.getMonth()+1).padStart(2,'0') + '-' +
+         String(d.getDate()).padStart(2,'0');
+}
+function nowTimeStr() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  applyDark();
+  applyLang();
+  renderAll();
+
+  // Set today's date as default in reminder modal
+  document.getElementById('reminder-date').value = todayStr();
+
+  // Start reminder checker every 30 seconds
+  setInterval(checkReminders, 30000);
+
+  // Greeting by time
+  const h = new Date().getHours();
+  const greeting = lang === 'ta'
+    ? (h < 12 ? '👋 காலை வணக்கம்!' : h < 17 ? '👋 மதிய வணக்கம்!' : '👋 மாலை வணக்கம்!')
+    : (h < 12 ? '👋 Good Morning!'  : h < 17 ? '👋 Good Afternoon!' : '👋 Good Evening!');
+  document.getElementById('dash-greeting').textContent = greeting;
+}
+
+init();
+</script>
+</body>
+</html>
