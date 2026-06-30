@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Billing System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💼 Simple Billing System</h1>
+            <nav>
+                <button class="nav-btn" onclick="showBilling()">🧾 Billing</button>
+                <button class="nav-btn" onclick="showDashboard()">📊 Sales Dashboard</button>
+                <button class="nav-btn" onclick="showStock()">📦 Stock</button>
+            </nav>
+        </header>
+
+        <!-- Billing Section -->
+        <div id="billingSection" class="billing-wrapper">
+            <!-- Left Side: Item Entry -->
+            <div class="item-entry-section">
+                <h2 class="section-title">Add Items</h2>
+                <form id="itemForm" class="item-form">
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" id="itemName" required placeholder="Start typing product name..." autocomplete="off">
+                            <div id="autocompleteList" class="autocomplete-list"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Price (₹)</label>
+                            <input type="number" id="itemPrice" step="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="itemQuantity">Quantity</label>
+                            <input type="number" id="itemQuantity" min="1" value="1" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Add to Cart</button>
+                </form>
+            </div>
+
+            <!-- Right Side: Cart & Bill -->
+            <div class="cart-section">
+                <h2 class="section-title">Cart</h2>
+                <div id="cartItems" class="cart-items">
+                    <p class="empty-cart">Cart is empty. Add items to get started.</p>
+                </div>
+                
+                <div class="bill-summary">
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="total">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="completeBillBtn" class="btn-success">✅ Complete Bill</button>
+                    <button id="printBillBtn" class="btn-primary">🖨️ Print Bill</button>
+                    <button id="clearCartBtn" class="btn-danger">🗑️ Clear Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Section -->
+        <div id="stockSection" class="stock-container hidden">
+            <h2 class="section-title">📦 Product Stock / Inventory</h2>
+            
+            <div class="stock-stats">
+                <div class="stock-stat-card">
+                    <div class="stock-stat-label">Total Products</div>
+                    <div class="stock-stat-value" id="totalProducts">0</div>
+                </div>
+                <div class="stock-stat-card">
+                    <div class="stock-stat-label">Recent Products</div>
+                    <div class="stock-stat-value" id="recentProducts">0</div>
+                </div>
+            </div>
+
+            <div class="stock-search-bar">
+                <input type="text" id="stockSearch" placeholder="🔍 Search products..." oninput="filterStock()">
+            </div>
+
+            <div class="stock-table-wrapper">
+                <table class="stock-table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Last Used</th>
+                            <th>Times Used</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
+                                No products in stock yet. Add products during billing to build your inventory!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="dashboard-container hidden">
+            <h2 class="section-title">Sales Dashboard</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card today">
+                    <div class="stat-label">Today's Sales</div>
+                    <div class="stat-value" id="todayTotal">₹0.00</div>
+                    <div class="stat-details" id="todayBills">0 bills</div>
+                </div>
+                <div class="stat-card month">
+                    <div class="stat-label">This Month's Sales</div>
+                    <div class="stat-value" id="monthTotal">₹0.00</div>
+                    <div class="stat-details" id="monthBills">0 bills</div>
+                </div>
+                <div class="stat-card all-time">
+                    <div class="stat-label">All Time Sales</div>
+                    <div class="stat-value" id="allTimeTotal">₹0.00</div>
+                    <div class="stat-details" id="allTimeBills">0 bills</div>
+                </div>
+            </div>
+
+            <div class="sales-view-controls">
+                <div class="view-toggle-buttons">
+                    <button id="dailyViewBtn" class="view-toggle-btn active" onclick="switchToDailyView()">📅 Daily</button>
+                    <button id="monthlyViewBtn" class="view-toggle-btn" onclick="switchToMonthlyView()">📆 Monthly</button>
+                </div>
+                
+                <div id="dailyControls" class="date-controls">
+                    <label for="dailyDatePicker">Select Date:</label>
+                    <input type="date" id="dailyDatePicker" onchange="updateSelectedDate(); viewDailySales();">
+                    <button class="today-btn" onclick="selectToday()">Today</button>
+                </div>
+                
+                <div id="monthlyControls" class="date-controls hidden">
+                    <label for="monthlyDatePicker">Select Month:</label>
+                    <input type="month" id="monthlyDatePicker" onchange="updateSelectedMonth(); viewMonthlySales();">
+                    <button class="today-btn" onclick="selectCurrentMonth()">This Month</button>
+                </div>
+            </div>
+
+            <div class="selected-period-summary">
+                <div class="period-summary-card">
+                    <div class="period-label" id="periodLabel">Selected Period Sales</div>
+                    <div class="period-amount" id="periodAmount">₹0.00</div>
+                    <div class="period-count" id="periodCount">0 bills</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 id="chartTitle" style="margin-bottom: 15px; color: #000; border-bottom: 2px solid #FFD700; padding-bottom: 8px;">📈 Sales Chart</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bills-table">
+                <h3 style="margin-bottom: 15px;">Recent Bills</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bill #</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billsTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #999;">No bills yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Viewer Modal -->
+    <div id="billViewerModal" class="bill-modal hidden">
+        <div class="bill-modal-content">
+            <div class="bill-modal-header">
+                <h2>📄 Bill Details</h2>
+                <button class="close-modal-btn" onclick="closeBillViewer()" type="button">✕</button>
+            </div>
+            <div id="billViewerContent" class="bill-viewer-content">
+                <!-- Bill content will be inserted here -->
+            </div>
+            <div class="bill-modal-actions">
+                <button id="editBillBtn" class="btn-primary" onclick="toggleEditMode()">✏️ Edit Bill</button>
+                <button id="saveBillBtn" class="btn-success hidden" onclick="saveBillChanges()">💾 Save Changes</button>
+                <button id="cancelEditBtn" class="btn-danger hidden" onclick="cancelEditMode()">❌ Cancel</button>
+                <button id="closeBillBtn" class="btn-danger" onclick="closeBillViewer()" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
